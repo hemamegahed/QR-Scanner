@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:task11/module/scan_or_code/scan_or_code.dart';
 import 'package:task11/shared/componant/componants.dart';
 import 'package:task11/shared/componant/constains.dart';
+import 'package:task11/shared/network/local/cache_helper.dart';
 
 import 'cubit/cubit.dart';
 import 'cubit/state.dart';
@@ -17,11 +18,14 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<LoginCubit, LoginStates>(listener: (context, state) {
-
       if (state is LoginSuccessState) {
-        navigateAndFinish(context, ScanOrCode());
-        token = state.loginModel!.data!.token!.toString();
+        CacheHelper.saveData(
+                key: 'token', value: state.loginModel!.data!.token!.toString())
+            .then((value) {
+          token = state.loginModel!.data!.token!.toString();
 
+          navigateAndFinish(context, ScanOrCode());
+        });
       }
     }, builder: (context, state) {
       return Scaffold(
@@ -32,23 +36,23 @@ class LoginScreen extends StatelessWidget {
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Stack(children: [
-                      Image.asset('assets/images/back1.png'),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 120, bottom: 100),
-                        child: Center(
-                          child: Text(
-                            'Login',
-                            style: Theme.of(context)
-                                .textTheme
-                                .headline5!
-                                .copyWith(fontWeight: FontWeight.bold),
+                    Stack(
+                      children: [
+                        Image.asset('assets/images/back1.png'),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 120, bottom: 100),
+                          child: Center(
+                            child: Text(
+                              'Login',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headline5!
+                                  .copyWith(fontWeight: FontWeight.bold),
+                            ),
                           ),
                         ),
-                      ),
-
-                    ],),
-
+                      ],
+                    ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 30),
                       child: defaultTextFormField(
@@ -71,8 +75,7 @@ class LoginScreen extends StatelessWidget {
                           sufix: LoginCubit.get(context).suffix,
                           controller: passwordController,
                           sufixPressed: () {
-                            LoginCubit.get(context)
-                                .changePasswordVisibility();
+                            LoginCubit.get(context).changePasswordVisibility();
                           },
                           textType: TextInputType.number,
                           validator: (value) {

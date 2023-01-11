@@ -19,11 +19,6 @@ class ScanOrCode extends StatefulWidget {
 
 class _ScanOrCodeState extends State<ScanOrCode> {
   final qrKey = GlobalKey(debugLabel: 'QR');
-  // void saveResult() {
-  //   if (barcode != null) {
-  //     scanningCode(token: token, code: barcode!.code.toString());
-  //   }
-  // }
 
   QRViewController? qrViewController;
   Barcode? barcode;
@@ -44,24 +39,6 @@ class _ScanOrCodeState extends State<ScanOrCode> {
   }
 
   ScanModel? scanModel;
-  void scanningCode({
-    required String code,
-    required String token,
-  }) async {
-    await DioHelper.postData(url: ScanUrl, data: {'token': token, 'code': code})
-        .then((value) {
-      setState(() {
-        scanModel = ScanModel.fromJson(value.data);
-        print(scanModel!.data.updatedAt);
-      });
-
-      print(scanModel!.data.createdAt.toString());
-    }).catchError((error) {
-      setState(() {
-        print(error.toString());
-      });
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +53,15 @@ class _ScanOrCodeState extends State<ScanOrCode> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      navigateAndFinish(context, const ResultScreen());
+                      DioHelper.postData(
+                              url: ScanUrl,
+                              data: {'token': token, 'code': barcode!.code})
+                          .then((value) {
+                        setState(() {
+                          scanModel = ScanModel.fromJson(value.data);
+                        });
+                        navigateAndFinish(context, const ResultScreen());
+                      }).catchError((erorr) {});
                     },
                     child: customIcon(Image: 'assets/images/Group 11.jpg'),
                   ),
@@ -184,14 +169,3 @@ class _ScanOrCodeState extends State<ScanOrCode> {
         }));
   }
 }
-
-// Barcode? result;
-// QRViewController? controller;
-// void _onQRViewCreated(QRViewController controller) {
-//   this.controller = controller;
-//   controller.scannedDataStream.listen((scanData) {
-//     setState(() {
-//       result = scanData;
-//     });
-//   });
-// }
